@@ -42,9 +42,11 @@
   <ItemGroup>
     <Compile Include="Args.cs" />
     <Compile Include="CsvColumnAttribute.cs" />
-    <Compile Include="CsvConfigAttribute.cs" />
+    <Compile Include="CsvConfigurationAttribute.cs" />
+    <Compile Include="CsvConfiguration.cs" />
     <Compile Include="CsvReader.cs" />
     <Compile Include="CsvReaderExtension.cs" />
+    <Compile Include="CsvUtilException.cs" />
     <Compile Include="CsvWriter.cs" />
     <Compile Include="DefaultDataConverter.cs" />
     <Compile Include="ICsvDataConverter.cs" />

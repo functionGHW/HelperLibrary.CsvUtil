@@ -16,10 +16,8 @@ namespace HelperLibrary.CsvUtil
 {
     public class DefaultDataConverter : ICsvDataConverter
     {
-        public static readonly DefaultDataConverter Instance = new DefaultDataConverter();
-
-        private DefaultDataConverter() { }
-
+        public static readonly DefaultDataConverter DefaultInstance = new DefaultDataConverter();
+        
         public object CsvContentToData(string value, Type targetType)
         {
             /*

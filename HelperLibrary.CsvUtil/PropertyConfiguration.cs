@@ -37,6 +37,6 @@ namespace HelperLibrary.CsvUtil
         /// 实现IDataConverter接口的数据转换类型的名称，包含命名空间。如果类型不在当前程序集中，需要加入程序集名称限定。
         /// 如果值为null，则默认使用DefaultDataConverter类型
         /// </summary>
-        public string Converter { get; set; }
+        public Type Converter { get; set; }
     }
 }

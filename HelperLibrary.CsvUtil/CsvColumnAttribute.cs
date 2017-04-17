@@ -24,5 +24,7 @@ namespace HelperLibrary.CsvUtil
         public string Name { get; set; }
 
         public int Index { get; set; } = -1;
+
+        public Type Converter { get; set; }
     }
 }

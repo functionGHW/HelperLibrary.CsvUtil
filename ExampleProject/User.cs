@@ -15,24 +15,29 @@ using System.Threading.Tasks;
 
 namespace ExampleProject
 {
-    [CsvConfig]
+    [CsvConfiguration(FirstDataRowIndex = 2)]
     public class User
     {
-        [CsvColumn(Index = 0)]
+        [CsvColumn("Id")]
         public int Id { get; set; }
 
-        [CsvColumn(Index = 1)]
+        [CsvColumn()]
         public string Name { get; set; }
 
         [CsvColumn(Index = 2)]
         public DateTime CreateTime { get; set; }
 
-        [CsvColumn(Index = 3)]
-        public bool IsAdmin { get; set; }
+        [CsvColumn("")]
+        public bool? IsAdmin { get; set; }
 
         public override string ToString()
         {
-            return $"{{ Id={Id}, Name={Name}, CreateTime={CreateTime}, IsAdmin={IsAdmin} }}";
+            string isAdmin = "null";
+            if (IsAdmin.HasValue)
+            {
+                isAdmin = IsAdmin.Value ? bool.TrueString : bool.FalseString;
+            }
+            return $"{{ Id={Id}, Name={Name}, CreateTime={CreateTime}, IsAdmin={isAdmin} }}";
         }
     }
 }

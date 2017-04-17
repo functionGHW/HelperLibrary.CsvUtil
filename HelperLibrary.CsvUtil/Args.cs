@@ -7,7 +7,7 @@ namespace HelperLibrary.CsvUtil
 {
     internal class Args
     {
-        public Args(Func<int, char> readChar, Func<int, bool> isEndOfContent, Action<List<List<string>>> groupHandler, int groupSize = 1)
+        public Args(Func<int, char> readChar, Func<int, bool> isEndOfContent, Action<List<List<string>>> groupHandler, int groupSize = 50)
         {
             if (readChar == null)
                 throw new ArgumentNullException(nameof(readChar));

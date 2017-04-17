@@ -15,19 +15,20 @@ namespace HelperLibrary.CsvUtil
         /// Read content from a TextReader, and handle 
         /// </summary>
         /// <param name="reader"></param>
-        /// <param name="rowHandler"></param>
+        /// <param name="groupHandler"></param>
         /// <param name="groupSize"></param>
-        public void Read(TextReader reader, Action<List<List<string>>> rowHandler, int groupSize = 10)
+        public void Read(TextReader reader, Action<List<List<string>>> groupHandler, int groupSize = 50)
         {
             if (reader == null)
                 throw new ArgumentNullException(nameof(reader));
 
-            if (rowHandler == null)
-                throw new ArgumentNullException(nameof(rowHandler));
+            if (groupHandler == null)
+                throw new ArgumentNullException(nameof(groupHandler));
 
-            var arg = new Args(i => (char)reader.Read(),
-                i => reader.Peek() == -1,
-                rowHandler, groupSize);
+            var arg = new Args(readChar: i => (char)reader.Read(),
+                isEndOfContent: i => reader.Peek() == -1,
+                groupHandler: groupHandler,
+                groupSize: groupSize);
 
             Read(arg);
         }
@@ -43,9 +44,9 @@ namespace HelperLibrary.CsvUtil
                 throw new ArgumentNullException(nameof(reader));
 
             var rows = new List<List<string>>();
-            var arg = new Args(i => (char)reader.Read(),
-                i => reader.Peek() == -1,
-                rs => rows.AddRange(rs), 10);
+            var arg = new Args(readChar: i => (char)reader.Read(),
+                isEndOfContent: i => reader.Peek() == -1,
+                groupHandler: rs => rows.AddRange(rs));
 
             Read(arg);
             return rows;
@@ -62,9 +63,9 @@ namespace HelperLibrary.CsvUtil
                 throw new ArgumentNullException(nameof(content));
 
             var rows = new List<List<string>>();
-            var arg = new Args(i => content[i],
-                i => i >= content.Length,
-                rs => rows.AddRange(rs), 10);
+            var arg = new Args(readChar: i => content[i],
+                isEndOfContent: i => i >= content.Length,
+                groupHandler: rs => rows.AddRange(rs));
 
             Read(arg);
             return rows;

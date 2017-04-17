@@ -20,26 +20,80 @@ namespace HelperLibrary.CsvUtil
     {
         public static List<T> ReadData<T>(this CsvReader csvReader, TextReader reader) where T : new()
         {
-            var result = csvReader.Read(reader);
+            if (csvReader == null)
+                throw new ArgumentNullException(nameof(csvReader));
 
-            return ConvertToObject<T>(result);
+            var list = new List<T>();
+
+            csvReader.Read(reader, rows =>
+            {
+                var result = ConvertToObject<T>(rows);
+                list.AddRange(result);
+            });
+
+            return list;
         }
 
         private static List<T> ConvertToObject<T>(List<List<string>> result) where T : new()
         {
-            var propConfigs = CreatePropertyConfig(typeof(T));
             var type = typeof(T);
 
+            var csvConfig = CreateCsvConfiguration(type);
+            var propConfigs = CreatePropertyConfig(type);
+
+            var headers = new ColumnNameIndexPair[0];
+            int firstDataRow = csvConfig.FirstDataRowIndex < 0 ? 1 : csvConfig.FirstDataRowIndex;
+
+            if (firstDataRow >= result.Count)
+                throw new CsvUtilException("Invalid FirstDataRowIndex");
+
+            if (csvConfig.NoColumnNameRow)
+            {
+                if (propConfigs.Any(p => !string.IsNullOrEmpty(p.ColumnName)))
+                    throw new CsvUtilException("Can not use ColumnName when CSV configuration NoColumnNameRow = true\n"
+                        + "Please only use ColumnIndex if the content doesn't have a row for column names, or set NoColumnNameRow = false");
+
+            }
+            else
+            {
+                int columnNameRow = csvConfig.ColumnNameRowIndex < 0 ? firstDataRow - 1 : csvConfig.ColumnNameRowIndex;
+
+                if (columnNameRow >= firstDataRow)
+                    throw new CsvUtilException("FirstDataRowIndex must be great than FirstDataRowIndex");
+
+                var columnRow = result[columnNameRow];
+                headers = columnRow.Select(cell => new ColumnNameIndexPair()
+                {
+                    Column = cell,
+                    Index = columnRow.IndexOf(cell)
+                }).ToArray();
+
+            }
+
+            var validMappings = (from c in propConfigs
+                                 let tmp = headers.FirstOrDefault(h => h.Column == c.ColumnName)
+                                 let hasColumn = !string.IsNullOrEmpty(c.ColumnName)
+                                 where type.GetProperty(c.Property) != null && (!hasColumn || (hasColumn && tmp != null))
+                                 select new
+                                 {
+                                     c.Property,
+                                     c.Converter,
+                                     Index = string.IsNullOrEmpty(c.ColumnName) ? c.ColumnIndex :
+                                            tmp == null ? -1 : tmp.Index
+                                 }).ToArray();
+
             var list = new List<T>();
-            foreach (var r in result)
+            foreach (var r in result.Skip(firstDataRow))
             {
                 var model = new T();
-
-                foreach (var p in propConfigs)
+                foreach (var p in validMappings)
                 {
-                    var prop = type.GetProperty(p.Property);
+                    if (p.Index >= r.Count)
+                        continue;
 
-                    string valueStr = r[p.ColumnIndex];
+                    var prop = type.GetProperty(p.Property);
+                    string valueStr = r[p.Index];
+                    var converter = GetConverter(p.Converter);
                     object value = GetConverter(p.Converter).CsvContentToData(valueStr, prop.PropertyType);
                     prop.SetValue(model, value);
                 }
@@ -49,9 +103,26 @@ namespace HelperLibrary.CsvUtil
             return list;
         }
 
-        private static ICsvDataConverter GetConverter(string converter)
+        private static CsvConfiguration CreateCsvConfiguration(Type type)
         {
-            return DefaultDataConverter.Instance;
+            var config = new CsvConfiguration();
+            var attr = type.GetCustomAttribute<CsvConfigurationAttribute>();
+            if (attr == null)
+                return config;
+
+            config.FirstDataRowIndex = attr.FirstDataRowIndex;
+            config.ColumnNameRowIndex = attr.ColumnNameRowIndex;
+            config.NoColumnNameRow = attr.NoColumnNameRow;
+
+            return config;
+        }
+
+        private static ICsvDataConverter GetConverter(Type converter)
+        {
+            if (converter == null)
+                return DefaultDataConverter.DefaultInstance;
+
+            return Activator.CreateInstance(converter) as ICsvDataConverter;
         }
 
         private static List<PropertyConfiguration> CreatePropertyConfig(Type modelType)
@@ -82,13 +153,25 @@ namespace HelperLibrary.CsvUtil
                 Property = prop.Name,
                 ColumnName = colAttr.Name,
                 ColumnIndex = colAttr.Index,
-                //Converter = colAttr.Converter == null ? null : colAttr.Converter.AssemblyQualifiedName,
+                Converter = colAttr.Converter
             };
             // 未指定Column和ColumnIndex配置，则默认使用属性名称作为列名
             if (result.ColumnName == null && result.ColumnIndex < 0)
                 result.ColumnName = prop.Name;
 
             return result;
+        }
+
+        private class ColumnNameIndexPair
+        {
+            public string Column { get; set; }
+
+            public int Index { get; set; }
+
+            public override string ToString()
+            {
+                return $"{{ Column={Column}, Index={Index} }}";
+            }
         }
     }
 }

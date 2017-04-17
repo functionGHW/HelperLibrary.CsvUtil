@@ -15,9 +15,9 @@ using System.Threading.Tasks;
 namespace HelperLibrary.CsvUtil
 {
     [AttributeUsage(AttributeTargets.Class)]
-    public class CsvConfigAttribute : Attribute
+    public class CsvConfigurationAttribute : Attribute
     {
-        public CsvConfigAttribute() { }
+        public CsvConfigurationAttribute() { }
 
         public int FirstDataRowIndex { get; set; } = -1;
 
