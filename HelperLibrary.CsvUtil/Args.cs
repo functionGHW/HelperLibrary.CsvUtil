@@ -7,7 +7,7 @@ namespace HelperLibrary.CsvUtil
 {
     internal class Args
     {
-        public Args(Func<int, char> readChar, Func<int, bool> isEndOfContent, Action<List<string>[]> groupHandler, int groupSize = 1)
+        public Args(Func<int, char> readChar, Func<int, bool> isEndOfContent, Action<List<List<string>>> groupHandler, int groupSize = 1)
         {
             if (readChar == null)
                 throw new ArgumentNullException(nameof(readChar));
@@ -38,7 +38,7 @@ namespace HelperLibrary.CsvUtil
 
         private Func<int, char> readChar;
 
-        private Action<List<string>[]> groupHandler;
+        private Action<List<List<string>>> groupHandler;
 
         private int groupSize;
 
@@ -92,7 +92,7 @@ namespace HelperLibrary.CsvUtil
         {
             if (group.Count > 0)
             {
-                groupHandler(group.ToArray());
+                groupHandler(group.ToList());
                 group.Clear();
             }
         }

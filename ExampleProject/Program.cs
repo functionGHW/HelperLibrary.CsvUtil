@@ -12,6 +12,30 @@ namespace ExampleProject
     {
         static void Main(string[] args)
         {
+            //ReaderAndWriterTest();
+            ReadToObjectTest();
+
+            Console.ReadLine();
+        }
+
+
+        static void ReadToObjectTest()
+        {
+            string filePath = "Users.csv";
+
+
+            var reader = new CsvReader();
+
+            var users = reader.ReadData<User>(File.OpenText(filePath));
+
+            foreach(var u in users)
+            {
+                Console.WriteLine(u);
+            }
+        }
+
+        static void ReaderAndWriterTest()
+        {
             string filePath = "example.csv";
             var reader = new CsvReader();
             var writer = new CsvWriter();
@@ -32,7 +56,7 @@ namespace ExampleProject
             }
 
             PrintContent(result);
-            
+
             Console.WriteLine("    write as a string in memory\n");
             content = writer.Write(result);
             Console.WriteLine(content);
@@ -52,7 +76,6 @@ namespace ExampleProject
                 }
             }
 
-            Console.ReadLine();
         }
 
         private static void PrintContent(List<List<string>> result)

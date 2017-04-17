@@ -17,7 +17,7 @@ namespace HelperLibrary.CsvUtil
         /// <param name="reader"></param>
         /// <param name="rowHandler"></param>
         /// <param name="groupSize"></param>
-        public void Read(TextReader reader, Action<List<string>[]> rowHandler, int groupSize = 10)
+        public void Read(TextReader reader, Action<List<List<string>>> rowHandler, int groupSize = 10)
         {
             if (reader == null)
                 throw new ArgumentNullException(nameof(reader));
