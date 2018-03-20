@@ -12,7 +12,11 @@ namespace ExampleProject
     {
         static void Main(string[] args)
         {
-            //ReaderAndWriterTest();
+            Console.WriteLine("===== ReaderAndWriterTest ====");
+            ReaderAndWriterTest();
+
+            Console.WriteLine();
+            Console.WriteLine("===== ReadToObjectTest ====");
             ReadToObjectTest();
 
             Console.ReadLine();
@@ -28,7 +32,7 @@ namespace ExampleProject
 
             var users = reader.ReadData<User>(File.OpenText(filePath));
 
-            foreach(var u in users)
+            foreach (var u in users)
             {
                 Console.WriteLine(u);
             }
@@ -41,7 +45,6 @@ namespace ExampleProject
             var writer = new CsvWriter();
             string content = null;
             List<List<string>> result;
-
 
             Console.WriteLine("    read from text.\n");
             content = File.ReadAllText(filePath);
@@ -65,15 +68,13 @@ namespace ExampleProject
             Console.WriteLine("    write to a TextWriter(Console.Out)\n");
             writer.WriteTo(result, Console.Out);
 
+            Console.WriteLine("    deal with large file test\n");
             // for reading large files, using this overload to reduce memory usage.
             using (var fr = File.OpenText(filePath))
             {
-                using (var fw = File.CreateText("test2.csv"))
-                {
-                    // write once every 100 rows
-                    int groupSize = 100;
-                    reader.Read(fr, group => writer.WriteTo(group, fw), groupSize);
-                }
+                // write once every 100 rows
+                int groupSize = 100;
+                reader.Read(fr, group => writer.WriteTo(group, Console.Out), groupSize);
             }
 
         }

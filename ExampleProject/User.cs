@@ -18,7 +18,7 @@ namespace ExampleProject
     [CsvConfiguration(FirstDataRowIndex = 2)]
     public class User
     {
-        [CsvColumn("Id")]
+        [CsvColumn("No")]
         public int Id { get; set; }
 
         [CsvColumn()]

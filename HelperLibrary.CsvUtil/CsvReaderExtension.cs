@@ -18,6 +18,13 @@ namespace HelperLibrary.CsvUtil
 {
     public static class CsvReaderExtension
     {
+        /// <summary>
+        /// Read CSV data and convert to model list.
+        /// </summary>
+        /// <typeparam name="T">type of model</typeparam>
+        /// <param name="csvReader"></param>
+        /// <param name="reader"></param>
+        /// <returns></returns>
         public static List<T> ReadData<T>(this CsvReader csvReader, TextReader reader) where T : new()
         {
             if (csvReader == null)
@@ -42,7 +49,10 @@ namespace HelperLibrary.CsvUtil
             var propConfigs = CreatePropertyConfig(type);
 
             var headers = new ColumnNameIndexPair[0];
-            int firstDataRow = csvConfig.FirstDataRowIndex < 0 ? 1 : csvConfig.FirstDataRowIndex;
+            int defaultFirstDataRow = csvConfig.NoColumnNameRow ? 0 : 1;
+            int firstDataRow = csvConfig.FirstDataRowIndex < 0
+                ? defaultFirstDataRow
+                : csvConfig.FirstDataRowIndex;
 
             if (firstDataRow >= result.Count)
                 throw new CsvUtilException("Invalid FirstDataRowIndex");
@@ -94,12 +104,11 @@ namespace HelperLibrary.CsvUtil
                     var prop = type.GetProperty(p.Property);
                     string valueStr = r[p.Index];
                     var converter = GetConverter(p.Converter);
-                    object value = GetConverter(p.Converter).CsvContentToData(valueStr, prop.PropertyType);
+                    object value = converter.CsvContentToData(valueStr, prop.PropertyType);
                     prop.SetValue(model, value);
                 }
                 list.Add(model);
             }
-
             return list;
         }
 
@@ -128,9 +137,7 @@ namespace HelperLibrary.CsvUtil
         private static List<PropertyConfiguration> CreatePropertyConfig(Type modelType)
         {
             var list = new List<PropertyConfiguration>();
-
             var props = modelType.GetProperties();
-
             foreach (var prop in props)
             {
                 var propConfig = CreateOnePropConfig(prop);
@@ -155,8 +162,8 @@ namespace HelperLibrary.CsvUtil
                 ColumnIndex = colAttr.Index,
                 Converter = colAttr.Converter
             };
-            // 未指定Column和ColumnIndex配置，则默认使用属性名称作为列名
-            if (result.ColumnName == null && result.ColumnIndex < 0)
+            // use property name as column name, if there is no column name and index given.
+            if (string.IsNullOrEmpty(result.ColumnName) && result.ColumnIndex < 0)
                 result.ColumnName = prop.Name;
 
             return result;

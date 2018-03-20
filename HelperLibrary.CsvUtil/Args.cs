@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 
@@ -7,16 +8,12 @@ namespace HelperLibrary.CsvUtil
 {
     internal class Args
     {
-        public Args(Func<int, char> readChar, Func<int, bool> isEndOfContent, Action<List<List<string>>> groupHandler, int groupSize = 50)
+        internal Args(Func<int, char> readChar, Func<int, bool> isEndOfContent, Action<List<List<string>>> groupHandler, int groupSize = 50)
         {
-            if (readChar == null)
-                throw new ArgumentNullException(nameof(readChar));
-
-            if (isEndOfContent == null)
-                throw new ArgumentNullException(nameof(isEndOfContent));
-            if (groupHandler == null)
-                throw new ArgumentNullException(nameof(groupHandler));
-
+            Contract.Assert(readChar != null);
+            Contract.Assert(isEndOfContent != null);
+            Contract.Assert(groupHandler != null);
+            
             if (groupSize < 1)
                 groupSize = 1;
 

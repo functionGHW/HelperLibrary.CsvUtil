@@ -18,11 +18,22 @@ namespace HelperLibrary.CsvUtil
     public class CsvConfigurationAttribute : Attribute
     {
         public CsvConfigurationAttribute() { }
-
+        
+        /// <summary>
+        /// Get or set row index of starting row of data.
+        /// </summary>
         public int FirstDataRowIndex { get; set; } = -1;
 
+        /// <summary>
+        /// Get or set row index of column name row(header row).
+        /// </summary>
         public int ColumnNameRowIndex { get; set; } = -1;
 
+        /// <summary>
+        /// Get or set if there is no column name row.
+        /// When set to true, the ColumnNameRowIndex property are ignored.
+        /// Note: If true, indexes of all Column must be given by CsvColumnAttribute.Index property.
+        /// </summary>
         public bool NoColumnNameRow { get; set; }
     }
 }
