@@ -98,6 +98,13 @@ namespace HelperLibrary.CsvUtil
             // check for ending
             switch (arg.State)
             {
+                case ReadState.CellBegin:
+                    if (arg.CurrentRow.Count > 0)
+                    {
+                        arg.PushCell();
+                        arg.PushRow();
+                    }
+                    break;
                 case ReadState.CellReading:
                 case ReadState.QuoteCell:
                 case ReadState.QuoteCellChkEnd:
@@ -182,6 +189,10 @@ namespace HelperLibrary.CsvUtil
                 case '\r':
                     break;
                 case '\n':
+                    if (arg.CurrentRow.Count > 0)
+                    {
+                        arg.PushCell();
+                    }
                     arg.LineCount++;
                     arg.PushRow();
                     break;
